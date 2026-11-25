@@ -3,6 +3,13 @@
 Multiple MCP servers in Rust ([`rmcp`](https://crates.io/crates/rmcp)) with one shared
 foundation, distributed through `npx` and `bunx`.
 
+## Servers
+
+| Server | Description |
+|---|---|
+| [woodpecker](servers/woodpecker/README.md) | Inspect Woodpecker CI pipelines, read logs and rerun builds |
+| [hello](servers/hello/README.md) | Minimal example, not meant for publishing |
+
 ## Requirements
 
 Rust (stable), Node 18 or newer, and Bun for `bunx`.
@@ -34,9 +41,9 @@ cargo xtask config weather --runner cargo  # snippet for your MCP client
 ```
 crates/mcp-core/    CLI, configuration, logging, stdio transport
 crates/xtask/       automation and templates
-servers/<name>/     a server (crate <name>-mcp); `hello` is the example
+servers/<name>/     a server (crate <name>-mcp)
 .claude/skills/     create-mcp, run-mcp, publish-mcp
-.github/workflows/  ci.yml, pr.yml and release.yml
+.github/workflows/  ci.yml, pr.yml, build.yml and release.yml
 ```
 
 A server consists of a `Config` struct and tools; `main.rs` is a single call:
