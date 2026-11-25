@@ -1,36 +1,36 @@
 # alpaca-mcp
 
-Rust-workspace met meerdere MCP-servers op basis van `rmcp`, gedistribueerd via npm
+Rust workspace with multiple MCP servers built on `rmcp`, distributed through npm
 (`npx` / `bunx`).
 
-## Indeling
+## Layout
 
-- `crates/mcp-core`: gedeelde bootstrap (CLI, configuratie, logging, stdio)
-- `crates/xtask`: `cargo xtask new|list|smoke|config|package|publish|lint-commits`, templates in
-  `crates/xtask/templates/`
-- `servers/<naam>`: één crate per server, crate en binary heten `<naam>-mcp`
+- `crates/mcp-core`: shared bootstrap (CLI, configuration, logging, stdio)
+- `crates/xtask`: `cargo xtask new|list|smoke|config|package|publish|lint-commits`,
+  templates in `crates/xtask/templates/`
+- `servers/<name>`: one crate per server, crate and binary are named `<name>-mcp`
 
-## Controle
+## Checks
 
 ```sh
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
-cargo xtask smoke <naam>
+cargo xtask smoke <name>
 ```
 
-## Regels
+## Rules
 
-- stdout is het MCP-protocol: log met `tracing`, nooit `println!` in servers.
-- Code, tool-beschrijvingen en package-README's in het Engels; overige documentatie in het
-  Nederlands.
-- Wat elke server nodig heeft hoort in `mcp-core`, niet gekopieerd per server.
-- Wijzig je een server-template, controleer dan met een tijdelijke `cargo xtask new` dat het
-  resultaat compileert en de test slaagt.
-- Platformlijst staat in `crates/xtask/src/package.rs` en in
-  `.github/workflows/release.yml`; houd ze gelijk.
-- Publiceren of tags pushen alleen na expliciet akkoord.
-- Commit messages en PR-titels zijn Engelse Conventional Commits; werk op een branch en
-  open een PR volgens `.github/pull_request_template.md`. Zie `CONTRIBUTING.md`.
+- stdout is the MCP protocol: log with `tracing`, never `println!` in servers.
+- Everything in the repository is written in English: code, comments, documentation, skills,
+  commit messages and pull requests.
+- What every server needs belongs in `mcp-core`, not copied per server.
+- After changing a server template, verify with a temporary `cargo xtask new` that the
+  result compiles and its test passes.
+- The platform list lives in `crates/xtask/src/package.rs` and in
+  `.github/workflows/release.yml`; keep them in sync.
+- Publish or push release tags only after explicit approval.
+- Commit messages and PR titles are Conventional Commits; work on a branch and open a PR
+  following `.github/pull_request_template.md`. See `CONTRIBUTING.md`.
 
 Skills: `create-mcp`, `run-mcp`, `publish-mcp`.

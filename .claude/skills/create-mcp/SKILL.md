@@ -1,83 +1,80 @@
 ---
 name: create-mcp
-description: Maak een nieuwe MCP-server in deze workspace of voeg tools, configuratie of resources toe aan een bestaande. Gebruik bij "maak een mcp", "nieuwe server", "voeg een tool toe".
+description: Create a new MCP server in this workspace, or add tools, configuration or resources to an existing one. Use for "create an MCP", "new server", "add a tool".
 ---
 
-# Een MCP-server maken
+# Creating an MCP server
 
-## 1. Bepaal de scope
+## 1. Determine the scope
 
-Weet vóór je begint: welke servernaam (kort, kleine letters, zonder `-mcp`), welke tools,
-welke externe API of bron, en welke configuratie of secrets. Vraag alleen wat je niet uit
-het verzoek of de code kunt halen.
+Know before you start: the server name (short, lowercase, without `-mcp`), which tools,
+which external API or source, and which configuration or secrets. Only ask what you cannot
+derive from the request or the code.
 
 ## 2. Scaffold
 
 ```sh
-cargo xtask new <naam> --description "Eén regel, Engels"
+cargo xtask new <name> --description "One line"
 ```
 
-Maak de mappen niet met de hand aan: het template levert `Cargo.toml`, `main.rs`, `lib.rs`
-met een werkende test, `README.md` en `config.example.toml`. Het workspace-glob pikt de
-crate automatisch op.
+Do not create the directories by hand: the template provides `Cargo.toml`, `main.rs`,
+`lib.rs` with a working test, `README.md` and `config.example.toml`. The workspace glob picks
+up the crate automatically.
 
-## 3. Implementeer in `servers/<naam>/src/`
+## 3. Implement in `servers/<name>/src/`
 
-- `main.rs` blijft zoals het is; CLI, config, logging en transport zitten in `mcp-core`.
-- Vervang de voorbeeldtool `greet` én de voorbeeldtest.
-- Wordt `lib.rs` groot, splits dan in modules (bijvoorbeeld `client.rs` voor de API,
-  `tools.rs` voor de tool-router). Houd tools dun: parameters valideren, client aanroepen,
-  resultaat vormgeven.
-- Nieuwe dependencies die meer servers kunnen gebruiken komen in
-  `[workspace.dependencies]` in de root `Cargo.toml`.
-- Voor HTTP: gebruik `reqwest` met rustls (geen OpenSSL), anders breken de musl- en
-  cross-builds.
+- `main.rs` stays as it is; CLI, config, logging and transport live in `mcp-core`.
+- Replace the example tool `greet` and the example test.
+- When `lib.rs` grows large, split it into modules (for example `client.rs` for the API,
+  `tools.rs` for the tool router). Keep tools thin: validate parameters, call the client,
+  shape the result.
+- New dependencies that more servers can use go into `[workspace.dependencies]` in the root
+  `Cargo.toml`.
+- For HTTP use `reqwest` with rustls (no OpenSSL), otherwise the musl and cross builds break.
 
 ### Tools
 
-- De `description` en de doc-comments op parametervelden zijn wat het model ziet. Schrijf ze
-  in het Engels en zeg wat de tool doet, wanneer je hem gebruikt en in welke eenheden of
-  formaten de parameters staan.
-- Verwachte fouten geef je terug als `Result<_, String>` (of `CallToolResult::error`), met
-  een melding waarmee het model zich kan herstellen. Geen `unwrap` op externe data.
-- Voor gestructureerde output: retourneer `Json<T>` met `T: Serialize + JsonSchema`.
-- Markeer gedrag met annotaties: `#[tool(description = "...", annotations(read_only_hint = true))]`,
-  en `destructive_hint = true` voor alles wat data wijzigt of geld kost.
-- Zware of blokkerende logica hoort in een `async fn`, blokkerend werk in
-  `tokio::task::spawn_blocking`.
-- Houd output beperkt: pagineer of kap lange lijsten af.
+- The `description` and the doc comments on parameter fields are what the model sees. State
+  what the tool does, when to use it, and the units or formats of the parameters.
+- Return expected errors as `Result<_, String>` (or `CallToolResult::error`) with a message
+  the model can recover from. No `unwrap` on external data.
+- For structured output return `Json<T>` with `T: Serialize + JsonSchema`.
+- Annotate behaviour: `#[tool(description = "...", annotations(read_only_hint = true))]`,
+  and `destructive_hint = true` for everything that changes data or costs money.
+- Heavy logic belongs in an `async fn`, blocking work in `tokio::task::spawn_blocking`.
+- Keep output bounded: paginate or truncate long lists.
 
-De exacte `rmcp`-API verandert tussen versies. Twijfel je, lees dan de broncode van de
-versie uit `Cargo.lock` (`cargo metadata` geeft het pad) in plaats van te gokken.
+The exact `rmcp` API changes between versions. When in doubt, read the source of the version
+in `Cargo.lock` (`cargo metadata` gives the path) instead of guessing.
 
-### Configuratie en secrets
+### Configuration and secrets
 
-- Voeg velden toe aan `Config`. Elk veld heeft een default of is `Option<T>`.
-- Secrets zijn `Option<String>` en worden in `new()` gecontroleerd met een duidelijke fout
-  die de omgevingsvariabele noemt (`<NAAM>_MCP_API_KEY`).
-- Log nooit secrets en zet ze niet in `config.example.toml`.
-- Bij een server die zonder secret niet start, moet de test een `Config` met dummywaarden
-  meegeven.
+- Add fields to `Config`. Every field has a default or is an `Option<T>`.
+- Secrets are `Option<String>` and are checked in `new()` with a clear error that names the
+  environment variable (`<NAME>_MCP_API_KEY`).
+- Never log secrets and do not put them in `config.example.toml`.
+- For a server that does not start without a secret, the test must pass a `Config` with
+  dummy values.
 
-### Nooit naar stdout schrijven
+### Never write to stdout
 
-stdout is het MCP-protocol. Log met `tracing::{info,warn,error}` (gaat naar stderr).
-Clippy weigert `println!` in servers.
+stdout is the MCP protocol. Log with `tracing::{info,warn,error}` (goes to stderr). Clippy
+rejects `println!` in servers.
 
-## 4. Documenteer
+## 4. Document
 
-Werk `servers/<naam>/README.md` bij (tabel met tools en configuratie) en
-`config.example.toml`. Die README wordt de npm-pagina.
+Update `servers/<name>/README.md` (tables of tools and configuration) and
+`config.example.toml`. That README becomes the npm page.
 
-## 5. Verifieer
+## 5. Verify
 
 ```sh
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
-cargo test -p <naam>-mcp
-cargo xtask smoke <naam>                 # echte handshake over stdio
+cargo test -p <name>-mcp
+cargo xtask smoke <name>                 # real handshake over stdio
 ```
 
-Heeft de server verplichte configuratie: `cargo xtask smoke <naam> -- --set api_key=dummy`.
-Meld pas dat het werkt als deze stappen slagen. Gebruik daarna de skill `run-mcp` om hem in
-een client te hangen, en `publish-mcp` om te releasen.
+If the server has required configuration:
+`cargo xtask smoke <name> -- --set api_key=dummy`. Only report that it works once these steps
+pass. Then use the `run-mcp` skill to hook it into a client, and `publish-mcp` to release.

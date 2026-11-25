@@ -1,62 +1,61 @@
 ---
 name: run-mcp
-description: Draai, test, configureer of debug een MCP-server uit deze workspace, ook via npx/bunx, en koppel hem aan Claude Code, Claude Desktop, Cursor of VS Code.
+description: Run, test, configure or debug an MCP server from this workspace, also through npx/bunx, and connect it to Claude Code, Claude Desktop, Cursor or VS Code.
 ---
 
-# Een MCP-server draaien en configureren
+# Running and configuring an MCP server
 
-## Draaien en testen
-
-```sh
-cargo xtask list                          # welke servers zijn er
-cargo run -p <naam>-mcp -- check          # configuratie valideren
-cargo xtask smoke <naam>                  # handshake + tools/list
-cargo xtask smoke <naam> --runner npx     # bouwt npm-packages, installeert lokaal, start via npx
-cargo xtask smoke <naam> --runner bunx    # idem via bunx
-cargo xtask smoke <naam> -- --set k=v     # argumenten voor de server na `--`
-```
-
-De npx/bunx-varianten werken zonder publiceren: ze installeren tarballs in
-`dist/sandbox/`.
-
-Interactief tools aanroepen kan met de MCP Inspector (downloadt van npm):
-`npx @modelcontextprotocol/inspector cargo run -q -p <naam>-mcp`.
-
-## Configuratie (later wint)
-
-1. defaults in de `Config`-struct
-2. TOML-bestand: `--config <pad>`, anders `<NAAM>_MCP_CONFIG`, anders
-   `<config-map van de gebruiker>/alpaca-mcp/<naam>-mcp.toml` als dat bestaat
-3. omgevingsvariabelen `<NAAM>_MCP_<KEY>`, genest met `__`
-4. `--set key=value`, genest met een punt
-
-Voorbeeld voor `hello`: `HELLO_MCP_GREETING=Hoi`. Onbekende sleutels zijn een fout.
-Logniveau: `--log debug` of `<NAAM>_MCP_LOG`; `--log rmcp=info` toont protocolverkeer.
-
-## Koppelen aan een client
+## Run and test
 
 ```sh
-cargo xtask config <naam> --runner cargo                  # deze checkout
-cargo xtask config <naam> --runner binary                 # release-binary (eerst bouwen)
-cargo xtask config <naam> --runner npx                    # gepubliceerd package
-cargo xtask config <naam> --runner bunx --pin             # vaste versie
-cargo xtask config <naam> --client vscode --env NAAM_MCP_KEY=waarde -- --log debug
+cargo xtask list                          # which servers exist
+cargo run -p <name>-mcp -- check          # validate the configuration
+cargo xtask smoke <name>                  # handshake + tools/list
+cargo xtask smoke <name> --runner npx     # build npm packages, install locally, start via npx
+cargo xtask smoke <name> --runner bunx    # same through bunx
+cargo xtask smoke <name> -- --set k=v     # server arguments go after `--`
 ```
 
-Het commando print alleen JSON. Voeg het samen met het bestaande bestand
-(`.mcp.json`, `claude_desktop_config.json`, `.vscode/mcp.json`) zonder andere servers te
-overschrijven. Vraag eerst toestemming voordat je configuratie buiten deze repo wijzigt, en
-zet geen secrets in bestanden die gecommit worden (gebruik in `.mcp.json` `${VARIABELE}`).
+The npx/bunx variants work without publishing: they install tarballs in `dist/sandbox/`.
 
-De npx-snippet krijgt op Windows automatisch `cmd /c`. Genereer hem op het
-besturingssysteem waar de client draait.
+To call tools interactively use the MCP Inspector (downloaded from npm):
+`npx @modelcontextprotocol/inspector cargo run -q -p <name>-mcp`.
 
-## Problemen
+## Configuration (later wins)
 
-| Symptoom | Oorzaak / oplossing |
+1. defaults in the `Config` struct
+2. TOML file: `--config <path>`, else `<NAME>_MCP_CONFIG`, else
+   `<user config dir>/alpaca-mcp/<name>-mcp.toml` if it exists
+3. environment variables `<NAME>_MCP_<KEY>`, nested with `__`
+4. `--set key=value`, nested with a dot
+
+Example for `hello`: `HELLO_MCP_GREETING=Hi`. Unknown keys are an error. Log level:
+`--log debug` or `<NAME>_MCP_LOG`; `--log rmcp=info` shows protocol traffic.
+
+## Connect to a client
+
+```sh
+cargo xtask config <name> --runner cargo                  # this checkout
+cargo xtask config <name> --runner binary                 # release binary (build it first)
+cargo xtask config <name> --runner npx                    # published package
+cargo xtask config <name> --runner bunx --pin             # fixed version
+cargo xtask config <name> --client vscode --env NAME_MCP_KEY=value -- --log debug
+```
+
+The command only prints JSON. Merge it into the existing file (`.mcp.json`,
+`claude_desktop_config.json`, `.vscode/mcp.json`) without overwriting other servers. Ask for
+permission before changing configuration outside this repository, and never put secrets in
+files that get committed (use `${VARIABLE}` in `.mcp.json`).
+
+On Windows the npx snippet automatically gets `cmd /c`. Generate it on the operating system
+where the client runs.
+
+## Troubleshooting
+
+| Symptom | Cause / solution |
 |---|---|
-| Client meldt ongeldige JSON | Iets schrijft naar stdout; gebruik `tracing` |
-| Start timeout met `--runner cargo` | Eerste build duurt lang; bouw vooraf of gebruik `binary` |
-| Build faalt: bestand in gebruik (Windows) | Een client draait de binary; stop de server daar |
-| `unsupported platform` / package ontbreekt | Niet voor dit platform gepubliceerd, of optional dependencies uitgeschakeld |
-| `invalid configuration` | Draai `check`; let op typfouten in sleutels en env-variabelen |
+| Client reports invalid JSON | Something writes to stdout; use `tracing` |
+| Startup timeout with `--runner cargo` | The first build is slow; build beforehand or use `binary` |
+| Build fails: file in use (Windows) | A client is running the binary; stop the server there |
+| `unsupported platform` / package missing | Not published for this platform, or optional dependencies disabled |
+| `invalid configuration` | Run `check`; look for typos in keys and environment variables |

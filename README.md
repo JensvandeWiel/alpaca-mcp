@@ -1,82 +1,83 @@
 # alpaca-mcp
 
-Meerdere MCP-servers in Rust ([`rmcp`](https://crates.io/crates/rmcp)), met één gedeelde
-basis en distribueerbaar via `npx` en `bunx`.
+Multiple MCP servers in Rust ([`rmcp`](https://crates.io/crates/rmcp)) with one shared
+foundation, distributed through `npx` and `bunx`.
 
-## Vereisten
+## Requirements
 
-Rust (stable), Node 18 of nieuwer, en Bun voor `bunx`.
+Rust (stable), Node 18 or newer, and Bun for `bunx`.
 
-## Snel starten
+## Quick start
 
 ```sh
 cargo xtask new weather --description "Weather forecasts"
 cargo test -p weather-mcp
 cargo xtask smoke weather                  # direct
-cargo xtask smoke weather --runner npx     # als npm-package, zonder publiceren
-cargo xtask config weather --runner cargo  # snippet voor je MCP-client
+cargo xtask smoke weather --runner npx     # as an npm package, without publishing
+cargo xtask config weather --runner cargo  # snippet for your MCP client
 ```
 
-## Commando's
+## Commands
 
-| Commando | Doel |
+| Command | Purpose |
 |---|---|
-| `cargo xtask new <naam>` | Nieuwe server uit het template |
-| `cargo xtask list [--json]` | Alle servers met versie en npm-naam |
-| `cargo xtask smoke <naam> [--runner cargo\|npx\|bunx]` | End-to-end handshake en `tools/list` |
-| `cargo xtask config <naam> [--runner npx\|bunx\|cargo\|binary] [--client claude\|vscode]` | Client-configuratie |
-| `cargo xtask package <naam>` | npm-packages in `dist/npm/` |
-| `cargo xtask publish <naam> [--execute]` | Publiceren (zonder `--execute` een dry run) |
-| `cargo xtask lint-commits --range <range>` | Commit messages controleren |
+| `cargo xtask new <name>` | New server from the template |
+| `cargo xtask list [--json]` | All servers with version and npm name |
+| `cargo xtask smoke <name> [--runner cargo\|npx\|bunx]` | End-to-end handshake and `tools/list` |
+| `cargo xtask config <name> [--runner npx\|bunx\|cargo\|binary] [--client claude\|vscode]` | Client configuration |
+| `cargo xtask package <name>` | npm packages in `dist/npm/` |
+| `cargo xtask publish <name> [--execute]` | Publish (a dry run without `--execute`) |
+| `cargo xtask lint-commits --range <range>` | Check commit messages |
 
-## Indeling
+## Layout
 
 ```
-crates/mcp-core/    CLI, configuratie, logging, stdio-transport
-crates/xtask/       automatisering en templates
-servers/<naam>/     een server (crate <naam>-mcp); `hello` is het voorbeeld
+crates/mcp-core/    CLI, configuration, logging, stdio transport
+crates/xtask/       automation and templates
+servers/<name>/     a server (crate <name>-mcp); `hello` is the example
 .claude/skills/     create-mcp, run-mcp, publish-mcp
-.github/workflows/  ci.yml en release.yml
+.github/workflows/  ci.yml, pr.yml and release.yml
 ```
 
-Een server bestaat uit een `Config`-struct en tools; `main.rs` is één aanroep:
+A server consists of a `Config` struct and tools; `main.rs` is a single call:
 
 ```rust
 mcp_core::run(mcp_core::server_spec!(), HelloServer::new).await
 ```
 
-## Configuratie
+## Configuration
 
-Elke server werkt hetzelfde. Later wint:
+Every server works the same way. Later sources win:
 
-1. defaults in de code
-2. TOML-bestand (`--config`, `<NAAM>_MCP_CONFIG`, of `alpaca-mcp/<naam>-mcp.toml` in de
-   config-map van de gebruiker)
-3. omgevingsvariabelen, bijvoorbeeld `HELLO_MCP_GREETING=Hoi` (`__` voor geneste sleutels)
-4. `--set greeting=Hoi`
+1. defaults in the code
+2. TOML file (`--config`, `<NAME>_MCP_CONFIG`, or `alpaca-mcp/<name>-mcp.toml` in the user's
+   config directory)
+3. environment variables, for example `HELLO_MCP_GREETING=Hi` (`__` for nested keys)
+4. `--set greeting=Hi`
 
-`<binary> check` valideert de configuratie, `--log debug` zet logging (stderr) ruimer.
+`<binary> check` validates the configuration, `--log debug` makes logging (stderr) more
+verbose.
 
-## Distributie
+## Distribution
 
-Elk package `<scope>/<naam>-mcp` bevat alleen een kleine Node-launcher. De binary zit in een
+Each package `<scope>/<name>-mcp` only contains a small Node launcher. The binary lives in a
 package per platform (`-win32-x64`, `-win32-arm64`, `-darwin-x64`, `-darwin-arm64`,
-`-linux-x64`, `-linux-arm64`) dat als optional dependency wordt meegeïnstalleerd. Er zijn
-geen install-scripts. Linux-binaries zijn statisch (musl).
+`-linux-x64`, `-linux-arm64`) that is installed as an optional dependency. There are no
+install scripts. Linux binaries are static (musl).
 
-Releasen: versie verhogen en een tag `<naam>-v<versie>` pushen.
+To release: bump the version and push a tag `<name>-v<version>`.
 
-### Instellingen
+### Settings
 
-`[workspace.metadata.mcp]` in `Cargo.toml` bepaalt de npm-scope (`@alpaca-mcp`), de licentie
-en de repository van de packages. Publiceren vraagt publish-rechten op die scope en het
-secret `NPM_TOKEN` in GitHub.
+`[workspace.metadata.mcp]` in `Cargo.toml` sets the npm scope (`@alpaca-mcp`), license and
+repository of the packages. Publishing requires publish rights on that scope and the
+`NPM_TOKEN` secret in GitHub.
 
-## Bijdragen
+## Contributing
 
-Zie [CONTRIBUTING.md](CONTRIBUTING.md): Conventional Commits, branches en pull requests.
-Na het clonen: `git config core.hooksPath .githooks`.
+See [CONTRIBUTING.md](CONTRIBUTING.md): Conventional Commits, branches and pull requests.
+After cloning: `git config core.hooksPath .githooks`.
 
-## Licentie
+## License
 
 [MIT](LICENSE)
