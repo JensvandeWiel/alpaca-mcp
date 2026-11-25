@@ -3,6 +3,9 @@
 node_modules/
 *.tgz
 
+# IDE project files
+.idea/
+
 # Local settings and secrets
 .env
 .env.*
