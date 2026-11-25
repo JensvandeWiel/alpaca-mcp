@@ -1,5 +1,7 @@
-# Releases one server. Push a tag `<server>-v<version>`, for example `hello-v0.1.0`.
-# Needs the repository secret NPM_TOKEN (npm automation or granular token).
+# Releases one server. Push a tag `<server>-v<version>`, for example `weather-v0.1.0`.
+# Authenticates with npm trusted publishing (OIDC). The secret NPM_TOKEN is only needed
+# for the first release of a package, because npm can only trust a publisher for a package
+# that exists. See .claude/skills/publish-mcp/SKILL.md.
 name: release
 
 on:
@@ -50,12 +52,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write # trusted publishing and provenance
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24 # trusted publishing needs npm 11.5.1 or later
           registry-url: https://registry.npmjs.org
       - uses: actions/download-artifact@v5
         with:
@@ -70,4 +72,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # npm only accepts provenance from public repositories.
           PROVENANCE: ${{ !github.event.repository.private && '--provenance' || '' }}
-        run: cargo xtask publish "${GITHUB_REF_NAME%-v*}" --execute $PROVENANCE
+        run: |
+          # npm tries OIDC first and falls back to the token. Once the secret is deleted,
+          # do not leave an empty variable behind.
+          if [ -z "$NODE_AUTH_TOKEN" ]; then unset NODE_AUTH_TOKEN; fi
+          cargo xtask publish "${GITHUB_REF_NAME%-v*}" --execute $PROVENANCE
