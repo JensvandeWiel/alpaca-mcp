@@ -28,7 +28,7 @@ cargo xtask smoke <name>
 - After changing a server template, verify with a temporary `cargo xtask new` that the
   result compiles and its test passes.
 - The platform list lives in `crates/xtask/src/package.rs` and in
-  `.github/workflows/release.yml`; keep them in sync.
+  `.github/workflows/build.yml`; keep them in sync.
 - Publish or push release tags only after explicit approval.
 - Commit messages and PR titles are Conventional Commits; work on a branch and open a PR
   following `.github/pull_request_template.md`. See `CONTRIBUTING.md`.

@@ -1,0 +1,60 @@
+# Release builds for every supported platform, shared by ci.yml and release.yml.
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      release:
+        description: Build only the server named by the release tag and upload its binary
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep in sync with PLATFORMS in crates/xtask/src/package.rs.
+        include:
+          - { target: x86_64-pc-windows-msvc, os: windows-latest }
+          - { target: aarch64-pc-windows-msvc, os: windows-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.os }}
+    env:
+      # C code in dependencies (TLS) needs the musl compiler.
+      CC_x86_64_unknown_linux_musl: musl-gcc
+      CC_aarch64_unknown_linux_musl: musl-gcc
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Build
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          rustup target add "$TARGET"
+          if [[ "$RELEASE" == true ]]; then
+            server="${GITHUB_REF_NAME%-v*}"
+            cargo build --release --locked -p "${server}-mcp" --target "$TARGET"
+            mkdir upload
+            binary="target/$TARGET/release/${server}-mcp"
+            if [[ "$TARGET" == *windows* ]]; then binary="$binary.exe"; fi
+            cp "$binary" upload/
+          else
+            cargo build --release --locked --workspace --exclude xtask --target "$TARGET"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: inputs.release
+        with:
+          name: ${{ matrix.target }}
+          path: upload/
+          if-no-files-found: error
