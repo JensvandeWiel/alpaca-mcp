@@ -1,0 +1,23 @@
+[package]
+name = "mcp-core"
+version = "0.1.0"
+description = "Shared bootstrap for the MCP servers in this workspace: CLI, configuration, logging, transport."
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+config.workspace = true
+dirs.workspace = true
+rmcp.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true

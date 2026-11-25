@@ -1,0 +1,3 @@
+#!/bin/sh
+# Enable once per clone: git config core.hooksPath .githooks
+exec cargo xtask lint-commits --message-file "$1"

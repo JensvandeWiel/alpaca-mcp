@@ -1,0 +1,8 @@
+# Configuration of hello-mcp. Every key is optional.
+#
+# Use it with `hello-mcp --config <path>` or HELLO_MCP_CONFIG=<path>, or save it as
+#   Windows: %APPDATA%\alpaca-mcp\hello-mcp.toml
+#   Linux:   ~/.config/alpaca-mcp/hello-mcp.toml
+#   macOS:   ~/Library/Application Support/alpaca-mcp/hello-mcp.toml
+
+greeting = "Hello"

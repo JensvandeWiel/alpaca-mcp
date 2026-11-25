@@ -1,0 +1,105 @@
+//! Tools of the `{{crate}}` server.
+
+use rmcp::{
+    ServerHandler,
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
+    model::{Implementation, ServerCapabilities, ServerConfig},
+    tool, tool_handler, tool_router,
+};
+use serde::Deserialize;
+
+/// Settings, see `config.example.toml`. Every field needs a default or must be
+/// an `Option`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Config {
+    pub greeting: String,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            greeting: "Hello".to_owned(),
+        }
+    }
+}
+
+/// The doc comments below end up in the tool's JSON schema.
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct GreetParams {
+    /// Name of the person to greet.
+    pub name: String,
+}
+
+#[derive(Clone)]
+pub struct {{type}} {
+    config: Config,
+    tool_router: ToolRouter<Self>,
+}
+
+impl {{type}} {
+    /// Validate the configuration and set up clients here.
+    pub fn new(config: Config) -> anyhow::Result<Self> {
+        Ok(Self {
+            config,
+            tool_router: Self::tool_router(),
+        })
+    }
+}
+
+#[tool_router]
+impl {{type}} {
+    #[tool(description = "Greet someone by name")]
+    fn greet(&self, Parameters(GreetParams { name }): Parameters<GreetParams>) -> String {
+        format!("{}, {name}!", self.config.greeting)
+    }
+}
+
+#[tool_handler(router = self.tool_router)]
+impl ServerHandler for {{type}} {
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new(
+                env!("CARGO_PKG_NAME"),
+                env!("CARGO_PKG_VERSION"),
+            ))
+            .with_instructions(env!("CARGO_PKG_DESCRIPTION"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use rmcp::{ServiceExt, model::CallToolRequestParams};
+    use serde_json::json;
+
+    use super::*;
+
+    /// Calls the tool through a real MCP client over an in-memory transport.
+    #[tokio::test]
+    async fn greet_uses_the_configured_greeting() -> anyhow::Result<()> {
+        let (server_side, client_side) = tokio::io::duplex(4096);
+        let server = {{type}}::new(Config {
+            greeting: "Hi".to_owned(),
+        })?;
+        let server = tokio::spawn(async move {
+            server.serve(server_side).await?.waiting().await?;
+            anyhow::Ok(())
+        });
+
+        let client = ().serve(client_side).await?;
+        let arguments = json!({ "name": "Ada" })
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let result = client
+            .call_tool(CallToolRequestParams::new("greet").with_arguments(arguments))
+            .await?;
+
+        let text = result.content[0].as_text().map(|t| t.text.as_str());
+        assert_eq!(text, Some("Hi, Ada!"));
+
+        client.cancel().await?;
+        server.await??;
+        Ok(())
+    }
+}

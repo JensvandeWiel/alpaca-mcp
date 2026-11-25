@@ -1,0 +1,48 @@
+# {{crate}}
+
+{{description}}
+
+## Run
+
+```sh
+npx -y {{npm}}
+bunx {{npm}}
+```
+
+## MCP client configuration
+
+```json
+{
+  "mcpServers": {
+    "{{name}}": {
+      "command": "npx",
+      "args": ["-y", "{{npm}}"],
+      "env": { "{{env}}_GREETING": "Hi" }
+    }
+  }
+}
+```
+
+On Windows use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "{{npm}}"]`.
+
+## Tools
+
+| Tool    | Description          |
+|---------|----------------------|
+| `greet` | Greet someone by name |
+
+## Configuration
+
+Later sources win: defaults, TOML file, environment variables, `--set`.
+
+| Key        | Environment variable | Default   | Description          |
+|------------|----------------------|-----------|----------------------|
+| `greeting` | `{{env}}_GREETING`   | `"Hello"` | Word used to greet   |
+
+| Option           | Environment variable | Description                       |
+|------------------|----------------------|-----------------------------------|
+| `--config PATH`  | `{{env}}_CONFIG`     | TOML configuration file           |
+| `--set KEY=VAL`  |                      | Override one key; repeatable      |
+| `--log FILTER`   | `{{env}}_LOG`        | Log filter, logs go to stderr     |
+
+`{{crate}} check` validates the configuration and exits.

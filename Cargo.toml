@@ -1,0 +1,44 @@
+[workspace]
+resolver = "3"
+# Cargo requires each glob to match at least one crate, so keep one server around.
+members = ["crates/*", "servers/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.90"
+publish = false # distribution happens through npm, see `cargo xtask publish`
+license = "MIT"
+repository = "https://github.com/JensvandeWiel/alpaca-mcp"
+
+# Settings used by `cargo xtask` when generating npm packages and client configs.
+[workspace.metadata.mcp]
+npm-scope = "@alpaca-mcp" # "" = unscoped packages
+license = "MIT"
+repository = "https://github.com/JensvandeWiel/alpaca-mcp" # must match for npm provenance
+
+[workspace.dependencies]
+mcp-core = { path = "crates/mcp-core" }
+
+anyhow = "1"
+clap = { version = "4.6", features = ["derive", "env"] }
+config = { version = "0.15", default-features = false, features = ["toml"] }
+dirs = "6"
+rmcp = { version = "3.11", features = ["server", "macros", "transport-io"] }
+schemars = "1.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.54", features = ["macros", "rt-multi-thread", "io-std", "io-util"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+# stdout carries the MCP protocol on stdio; log with `tracing` instead.
+print_stdout = "deny"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

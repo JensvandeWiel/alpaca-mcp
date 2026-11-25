@@ -1,0 +1,27 @@
+name: pr
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      # The title becomes the commit message when the PR is squash merged.
+      # It is passed through the environment so it cannot inject shell code.
+      - name: Check PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: cargo xtask lint-commits --message "$TITLE"
+      - name: Check commits
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: cargo xtask lint-commits --range "$BASE..$HEAD"

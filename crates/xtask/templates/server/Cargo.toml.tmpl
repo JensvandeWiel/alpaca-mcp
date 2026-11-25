@@ -1,0 +1,26 @@
+[package]
+name = "{{crate}}"
+version = "0.1.0"
+description = {{description_toml}}
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+mcp-core.workspace = true
+
+anyhow.workspace = true
+rmcp.workspace = true
+schemars.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+rmcp = { workspace = true, features = ["client"] }
+serde_json.workspace = true
+
+[lints]
+workspace = true

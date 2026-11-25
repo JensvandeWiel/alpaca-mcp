@@ -1,0 +1,10 @@
+/target
+/dist
+node_modules/
+*.tgz
+
+# Local settings and secrets
+.env
+.env.*
+*.local.toml
+.claude/settings.local.json
