@@ -82,6 +82,11 @@ Let op: niets naar stdout in servers, geen secrets in code of logs, duidelijke
 tool-beschrijvingen, gemarkeerde destructieve tools, tests voor nieuw gedrag en
 bijgewerkte documentatie.
 
+## Dependency-updates
+
+Renovate (`renovate.json`) opent update-PR's met conventionele titels zoals
+`chore(deps): ...`. Behandel ze als elke andere PR: mergen als CI groen is.
+
 ## Releases
 
 Elke server heeft zijn eigen versie. Release met een commit
