@@ -70,8 +70,9 @@ To release: bump the version and push a tag `<name>-v<version>`.
 ### Settings
 
 `[workspace.metadata.mcp]` in `Cargo.toml` sets the npm scope (`@alpaca-mcp`), license and
-repository of the packages. Publishing requires publish rights on that scope and the
-`NPM_TOKEN` secret in GitHub.
+repository of the packages. Releases authenticate with npm trusted publishing; only the first
+release of a new package needs the `NPM_TOKEN` secret. The steps are in
+[the publish skill](.claude/skills/publish-mcp/SKILL.md).
 
 ## Contributing
 
