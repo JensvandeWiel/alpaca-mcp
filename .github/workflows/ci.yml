@@ -27,3 +27,7 @@ jobs:
       # Proves that packaging still produces something npx and bunx can start.
       - run: cargo xtask smoke hello --runner npx
       - run: cargo xtask smoke hello --runner bunx
+
+  # Finds platform problems before a release does.
+  build:
+    uses: ./.github/workflows/build.yml

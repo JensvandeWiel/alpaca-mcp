@@ -1,0 +1,18 @@
+# Configuration of woodpecker-mcp.
+#
+# Use it with `woodpecker-mcp --config <path>` or WOODPECKER_MCP_CONFIG=<path>, or save it as
+#   Windows: %APPDATA%\alpaca-mcp\woodpecker-mcp.toml
+#   Linux:   ~/.config/alpaca-mcp/woodpecker-mcp.toml
+#   macOS:   ~/Library/Application Support/alpaca-mcp/woodpecker-mcp.toml
+
+# Required. Include a subpath if there is one, but not `/api`.
+url = "https://ci.example.com"
+
+# Required. Better set it through WOODPECKER_MCP_TOKEN than store it in this file.
+# token = ""
+
+# false adds the tools that start, cancel, approve and decline pipelines.
+read_only = true
+
+max_log_lines = 200
+timeout_seconds = 30

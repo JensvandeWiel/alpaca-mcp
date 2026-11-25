@@ -42,7 +42,7 @@ const fn platform(
     }
 }
 
-/// Keep in sync with the build matrix in .github/workflows/release.yml.
+/// Keep in sync with the build matrix in .github/workflows/build.yml.
 /// Linux uses musl so one static binary runs on every distribution.
 pub const PLATFORMS: [Platform; 6] = [
     platform("win32-x64", "x86_64-pc-windows-msvc", "win32", "x64"),

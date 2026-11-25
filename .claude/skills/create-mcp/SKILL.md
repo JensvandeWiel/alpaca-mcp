@@ -30,7 +30,10 @@ up the crate automatically.
   shape the result.
 - New dependencies that more servers can use go into `[workspace.dependencies]` in the root
   `Cargo.toml`.
-- For HTTP use `reqwest` with rustls (no OpenSSL), otherwise the musl and cross builds break.
+- For HTTP use the workspace `reqwest` and `rustls` dependencies and install the `ring`
+  provider, as `servers/woodpecker/src/client.rs` does. OpenSSL or `aws-lc-rs` complicate
+  the musl and cross builds. `woodpecker` is also the reference for read-only modes and
+  tests against a mocked API.
 
 ### Tools
 
