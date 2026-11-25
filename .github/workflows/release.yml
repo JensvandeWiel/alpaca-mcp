@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 24 # trusted publishing needs npm 11.5.1 or later
           registry-url: https://registry.npmjs.org
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts # one directory per target
       - name: Package
